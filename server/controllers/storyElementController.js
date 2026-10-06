@@ -3,17 +3,17 @@ const StoryElement = require("../models/StoryElement");
 
 const createStoryElement = async (req, res) => {
   try {
-    const { name, type, role, status, description, notes, image, story } =
-      req.body;
+    const { name, type, role, status, description, notes, image } = req.body;
+    const { storyId } = req.params;
 
-    if (!name || !type || !story) {
+    if (!name || !type) {
       return res.status(400).json({
-        message: "Name, type, and story are required",
+        message: "Name and type are required",
       });
     }
 
     const parentStory = await Story.findOne({
-      _id: story,
+      _id: storyId,
       user: req.user.id,
     });
 
@@ -31,7 +31,7 @@ const createStoryElement = async (req, res) => {
       description,
       notes,
       image,
-      story,
+      story: storyId,
     });
 
     return res.status(201).json(storyElement);
@@ -55,9 +55,25 @@ const getStoryElements = async (req, res) => {
       });
     }
 
-    const storyElements = await StoryElement.find({
+    const allowedTypes = ["CHARACTER", "LOCATION", "EVENT", "FACTION", "ITEM"];
+
+    const { type } = req.query;
+
+    if (type && !allowedTypes.includes(type)) {
+      return res.status(400).json({
+        message: "Invalid story element type",
+      });
+    }
+
+    const filter = {
       story: parentStory._id,
-    }).sort({
+    };
+
+    if (type) {
+      filter.type = type;
+    }
+
+    const storyElements = await StoryElement.find(filter).sort({
       createdAt: -1,
     });
 
@@ -71,20 +87,25 @@ const getStoryElements = async (req, res) => {
 
 const getStoryElement = async (req, res) => {
   try {
-    const storyElement = await StoryElement.findById(req.params.elementId);
-
-    if (!storyElement) {
-      return res.status(404).json({
-        message: "Story element not found",
-      });
-    }
+    const { storyId, elementId } = req.params;
 
     const parentStory = await Story.findOne({
-      _id: storyElement.story,
+      _id: storyId,
       user: req.user.id,
     });
 
     if (!parentStory) {
+      return res.status(404).json({
+        message: "Story not found",
+      });
+    }
+
+    const storyElement = await StoryElement.findOne({
+      _id: elementId,
+      story: storyId,
+    });
+
+    if (!storyElement) {
       return res.status(404).json({
         message: "Story element not found",
       });
@@ -100,22 +121,26 @@ const getStoryElement = async (req, res) => {
 
 const updateStoryElement = async (req, res) => {
   try {
+    const { storyId, elementId } = req.params;
     const { name, type, role, status, description, notes, image } = req.body;
 
-    const storyElement = await StoryElement.findById(req.params.elementId);
-
-    if (!storyElement) {
-      return res.status(404).json({
-        message: "Story element not found",
-      });
-    }
-
     const parentStory = await Story.findOne({
-      _id: storyElement.story,
+      _id: storyId,
       user: req.user.id,
     });
 
     if (!parentStory) {
+      return res.status(404).json({
+        message: "Story not found",
+      });
+    }
+
+    const storyElement = await StoryElement.findOne({
+      _id: elementId,
+      story: storyId,
+    });
+
+    if (!storyElement) {
       return res.status(404).json({
         message: "Story element not found",
       });
@@ -141,20 +166,25 @@ const updateStoryElement = async (req, res) => {
 
 const deleteStoryElement = async (req, res) => {
   try {
-    const storyElement = await StoryElement.findById(req.params.elementId);
-
-    if (!storyElement) {
-      return res.status(404).json({
-        message: "Story element not found",
-      });
-    }
+    const { storyId, elementId } = req.params;
 
     const parentStory = await Story.findOne({
-      _id: storyElement.story,
+      _id: storyId,
       user: req.user.id,
     });
 
     if (!parentStory) {
+      return res.status(404).json({
+        message: "Story not found",
+      });
+    }
+
+    const storyElement = await StoryElement.findOne({
+      _id: elementId,
+      story: storyId,
+    });
+
+    if (!storyElement) {
       return res.status(404).json({
         message: "Story element not found",
       });

@@ -19,7 +19,7 @@ app.use("/api/users", authRoutes);
 
 app.use("/api/stories", storyRoutes);
 
-app.use("/api/story-elements", storyElementRoutes);
+app.use("/api/stories", storyElementRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "Story Vault API is running" });
