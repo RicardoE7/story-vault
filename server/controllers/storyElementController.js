@@ -98,8 +98,84 @@ const getStoryElement = async (req, res) => {
   }
 };
 
+const updateStoryElement = async (req, res) => {
+  try {
+    const { name, type, role, status, description, notes, image } = req.body;
+
+    const storyElement = await StoryElement.findById(req.params.elementId);
+
+    if (!storyElement) {
+      return res.status(404).json({
+        message: "Story element not found",
+      });
+    }
+
+    const parentStory = await Story.findOne({
+      _id: storyElement.story,
+      user: req.user.id,
+    });
+
+    if (!parentStory) {
+      return res.status(404).json({
+        message: "Story element not found",
+      });
+    }
+
+    storyElement.name = name ?? storyElement.name;
+    storyElement.type = type ?? storyElement.type;
+    storyElement.role = role ?? storyElement.role;
+    storyElement.status = status ?? storyElement.status;
+    storyElement.description = description ?? storyElement.description;
+    storyElement.notes = notes ?? storyElement.notes;
+    storyElement.image = image ?? storyElement.image;
+
+    await storyElement.save();
+
+    return res.status(200).json(storyElement);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Unable to update story element",
+    });
+  }
+};
+
+const deleteStoryElement = async (req, res) => {
+  try {
+    const storyElement = await StoryElement.findById(req.params.elementId);
+
+    if (!storyElement) {
+      return res.status(404).json({
+        message: "Story element not found",
+      });
+    }
+
+    const parentStory = await Story.findOne({
+      _id: storyElement.story,
+      user: req.user.id,
+    });
+
+    if (!parentStory) {
+      return res.status(404).json({
+        message: "Story element not found",
+      });
+    }
+
+    await storyElement.deleteOne();
+
+    return res.status(200).json({
+      message: "Story element deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Unable to delete story element",
+    });
+  }
+};
+
 module.exports = {
   createStoryElement,
   getStoryElements,
   getStoryElement,
+  updateStoryElement,
+  deleteStoryElement,
 };
