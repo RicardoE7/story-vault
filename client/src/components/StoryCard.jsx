@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const statusLabels = {
   PLANNING: "Planning",
   IN_PROGRESS: "In Progress",
@@ -27,12 +29,12 @@ function StoryCard({ story }) {
             {statusLabels[story.status] || "Planning"}
           </span>
 
-          <button
-            type="button"
+          <Link
+            to={`/stories/${story._id}`}
             className="text-sm font-semibold text-burgundy transition-colors hover:text-burgundy-dark"
           >
             Open story
-          </button>
+          </Link>
         </div>
       </div>
     </article>
