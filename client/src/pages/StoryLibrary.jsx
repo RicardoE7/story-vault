@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { getStories } from "../api/stories";
 import StoryCard from "../components/StoryCard";
+import StoryModal from "../components/StoryModal";
 
 function StoryLibrary() {
   const [stories, setStories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const loadStories = async () => {
@@ -42,6 +44,7 @@ function StoryLibrary() {
 
           <button
             type="button"
+            onClick={() => setIsModalOpen(true)}
             className="rounded-md bg-burgundy px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-burgundy-dark"
           >
             New story
@@ -85,6 +88,14 @@ function StoryLibrary() {
           )}
         </div>
       </section>
+      {isModalOpen && (
+        <StoryModal
+          onClose={() => setIsModalOpen(false)}
+          onStoryCreated={(story) => {
+            setStories((currentStories) => [story, ...currentStories]);
+          }}
+        />
+      )}
     </main>
   );
 }
