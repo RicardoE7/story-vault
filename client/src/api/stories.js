@@ -8,6 +8,14 @@ const getStory = (storyId) => {
   return request(`/api/stories/${storyId}`);
 };
 
+const getStoryElements = (storyId) => {
+  return request(`/api/stories/${storyId}/elements`);
+};
+
+const getStoryElement = (storyId, elementId) => {
+  return request(`/api/stories/${storyId}/elements/${elementId}`);
+};
+
 const createStory = (formData) => {
   return request("/api/stories", {
     method: "POST",
@@ -28,4 +36,12 @@ const deleteStory = (storyId) => {
   });
 };
 
-export { getStories, getStory, createStory, updateStory, deleteStory };
+export {
+  getStories,
+  getStory,
+  getStoryElements,
+  getStoryElement,
+  createStory,
+  updateStory,
+  deleteStory,
+};
