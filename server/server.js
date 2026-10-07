@@ -1,12 +1,13 @@
+require("dotenv").config();
+
 const express = require("express");
-const dotenv = require("dotenv");
 const connectDB = require("./config/connection");
 const authRoutes = require("./routes/authRoutes");
 const protect = require("./middleware/authMiddleware");
 const storyRoutes = require("./routes/storyRoutes");
 const storyElementRoutes = require("./routes/storyElementRoutes");
-
-dotenv.config();
+const upload = require("./middleware/uploadMiddleware");
+const uploadToCloudinary = require("./utils/uploadToCloudinary");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
