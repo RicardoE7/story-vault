@@ -1,4 +1,31 @@
+import { useEffect, useState } from "react";
+import { getStories } from "../api/stories";
+import StoryCard from "../components/StoryCard";
+
 function StoryLibrary() {
+  const [stories, setStories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadStories = async () => {
+      try {
+        setIsLoading(true);
+        setError("");
+
+        const data = await getStories();
+
+        setStories(data);
+      } catch (err) {
+        setError(err.message || "Unable to load your stories.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadStories();
+  }, []);
+
   return (
     <main className="min-h-screen bg-ivory text-ink">
       <header className="border-b border-stone">
@@ -33,7 +60,29 @@ function StoryLibrary() {
         </div>
 
         <div className="mt-8">
-          <p className="text-sm text-muted">Your stories will appear here.</p>
+          {isLoading && (
+            <p className="text-sm text-muted">Loading your stories...</p>
+          )}
+
+          {!isLoading && error && (
+            <p className="text-sm leading-6 text-burgundy" role="alert">
+              {error}
+            </p>
+          )}
+
+          {!isLoading && !error && stories.length === 0 && (
+            <p className="text-sm text-muted">
+              You haven't created a story yet.
+            </p>
+          )}
+
+          {!isLoading && !error && stories.length > 0 && (
+            <div className="grid gap-6 md:grid-cols-2">
+              {stories.map((story) => (
+                <StoryCard key={story._id} story={story} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </main>
