@@ -1,18 +1,20 @@
+import { Navigate, Route, Routes } from "react-router-dom";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import StoryLibrary from "./pages/StoryLibrary";
+import StoryWorkspace from "./pages/StoryWorkspace";
+
 function App() {
   return (
-    <main className="min-h-screen bg-ivory px-8 py-12">
-      <p className="mb-2 text-sm font-semibold uppercase tracking-[0.04em] text-muted">
-        Story Vault
-      </p>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/stories" element={<StoryLibrary />} />
+      <Route path="/stories/:storyId" element={<StoryWorkspace />} />
 
-      <h1 className="font-display text-5xl font-semibold tracking-tight text-ink">
-        Your stories deserve a home.
-      </h1>
-
-      <p className="mt-4 max-w-xl text-base leading-7 text-muted">
-        Capture, organize, and preserve the stories that matter.
-      </p>
-    </main>
+      <Route path="/" element={<Navigate to="/stories" replace />} />
+      <Route path="*" element={<Navigate to="/stories" replace />} />
+    </Routes>
   );
 }
 

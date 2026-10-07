@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");
 const connectDB = require("./config/connection");
 const authRoutes = require("./routes/authRoutes");
 const protect = require("./middleware/authMiddleware");
@@ -10,6 +11,7 @@ const upload = require("./middleware/uploadMiddleware");
 const uploadToCloudinary = require("./utils/uploadToCloudinary");
 
 const app = express();
+app.use(cors());
 const PORT = process.env.PORT || 3001;
 
 connectDB();
