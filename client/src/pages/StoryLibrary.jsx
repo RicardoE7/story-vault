@@ -1,5 +1,43 @@
 function StoryLibrary() {
-  return <main>Story Library</main>;
+  return (
+    <main className="min-h-screen bg-ivory text-ink">
+      <header className="border-b border-stone">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.04em] text-muted">
+              Story Vault
+            </p>
+
+            <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight">
+              Your Stories
+            </h1>
+          </div>
+
+          <button
+            type="button"
+            className="rounded-md bg-burgundy px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-burgundy-dark"
+          >
+            New story
+          </button>
+        </div>
+      </header>
+
+      <section className="mx-auto max-w-6xl px-6 py-12">
+        <div className="border-b border-stone pb-4">
+          <h2 className="font-display text-2xl font-semibold">Story library</h2>
+
+          <p className="mt-1 text-sm text-muted">
+            Your worlds, characters, places, and stories in one private
+            workspace.
+          </p>
+        </div>
+
+        <div className="mt-8">
+          <p className="text-sm text-muted">Your stories will appear here.</p>
+        </div>
+      </section>
+    </main>
+  );
 }
 
 export default StoryLibrary;
