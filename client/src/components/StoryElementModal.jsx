@@ -1,15 +1,28 @@
 import { useState } from "react";
-import { createStory } from "../api/stories";
+import { createStoryElement } from "../api/stories";
 
-function StoryModal({ onClose, onStoryCreated }) {
+const typeLabels = {
+  CHARACTER: "Character",
+  LOCATION: "Location",
+  EVENT: "Event",
+  FACTION: "Faction",
+  ITEM: "Item",
+};
+
+function StoryElementModal({
+  storyId,
+  elementType,
+  onClose,
+  onElementCreated,
+}) {
   const [form, setForm] = useState({
-    title: "",
+    name: "",
+    role: "",
+    status: "",
     description: "",
-    genre: "",
-    status: "PLANNING",
+    notes: "",
   });
 
-  const [image, setImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -20,10 +33,6 @@ function StoryModal({ onClose, onStoryCreated }) {
     }));
   };
 
-  const handleImageChange = (event) => {
-    setImage(event.target.files[0] || null);
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -31,27 +40,21 @@ function StoryModal({ onClose, onStoryCreated }) {
       setIsSubmitting(true);
       setError("");
 
-      const formData = new FormData();
+      const createdElement = await createStoryElement(storyId, {
+        ...form,
+        type: elementType,
+      });
 
-      formData.append("title", form.title);
-      formData.append("description", form.description);
-      formData.append("genre", form.genre);
-      formData.append("status", form.status);
-
-      if (image) {
-        formData.append("image", image);
-      }
-
-      const createdStory = await createStory(formData);
-
-      onStoryCreated(createdStory);
+      onElementCreated(createdElement);
       onClose();
     } catch (err) {
-      setError(err.message || "Unable to create story.");
+      setError(err.message || "Unable to create story element.");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const label = typeLabels[elementType];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-ink/40 px-6 py-8">
@@ -59,11 +62,11 @@ function StoryModal({ onClose, onStoryCreated }) {
         <div className="flex items-start justify-between border-b border-stone px-6 py-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.04em] text-muted">
-              Story
+              {label}
             </p>
 
             <h2 className="mt-1 font-display text-3xl font-semibold tracking-tight">
-              New Story
+              Add {label}
             </h2>
           </div>
 
@@ -80,15 +83,42 @@ function StoryModal({ onClose, onStoryCreated }) {
         <div className="overflow-y-auto px-6 py-5">
           <form onSubmit={handleSubmit} className="space-y-5">
             <label className="block">
-              <span className="text-sm font-semibold">Title</span>
+              <span className="text-sm font-semibold">Name</span>
 
               <input
                 type="text"
-                name="title"
-                value={form.title}
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                required
+                className="mt-2 w-full rounded-sm border border-stone bg-ivory px-3 py-3 text-sm outline-none transition-colors focus:border-burgundy"
+                placeholder={`Enter ${label.toLowerCase()} name`}
+              />
+            </label>
+
+            <label className="block">
+              <span className="text-sm font-semibold">Role / Label</span>
+
+              <input
+                type="text"
+                name="role"
+                value={form.role}
                 onChange={handleChange}
                 className="mt-2 w-full rounded-sm border border-stone bg-ivory px-3 py-3 text-sm outline-none transition-colors focus:border-burgundy"
-                placeholder="Enter your story title"
+                placeholder="Protagonist, Kingdom, Turning Point..."
+              />
+            </label>
+
+            <label className="block">
+              <span className="text-sm font-semibold">Status</span>
+
+              <input
+                type="text"
+                name="status"
+                value={form.status}
+                onChange={handleChange}
+                className="mt-2 w-full rounded-sm border border-stone bg-ivory px-3 py-3 text-sm outline-none transition-colors focus:border-burgundy"
+                placeholder="Active, planned, historical..."
               />
             </label>
 
@@ -101,47 +131,20 @@ function StoryModal({ onClose, onStoryCreated }) {
                 onChange={handleChange}
                 rows="4"
                 className="mt-2 w-full resize-none rounded-sm border border-stone bg-ivory px-3 py-3 text-sm outline-none transition-colors focus:border-burgundy"
-                placeholder="What is this story about?"
+                placeholder={`Describe this ${label.toLowerCase()}...`}
               />
             </label>
 
             <label className="block">
-              <span className="text-sm font-semibold">Genre</span>
+              <span className="text-sm font-semibold">Notes</span>
 
-              <input
-                type="text"
-                name="genre"
-                value={form.genre}
+              <textarea
+                name="notes"
+                value={form.notes}
                 onChange={handleChange}
-                className="mt-2 w-full rounded-sm border border-stone bg-ivory px-3 py-3 text-sm outline-none transition-colors focus:border-burgundy"
-                placeholder="Fantasy, science fiction, mystery..."
-              />
-            </label>
-
-            <label className="block">
-              <span className="text-sm font-semibold">Status</span>
-
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                className="mt-2 w-full rounded-sm border border-stone bg-ivory px-3 py-3 text-sm outline-none transition-colors focus:border-burgundy"
-              >
-                <option value="PLANNING">Planning</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="COMPLETED">Completed</option>
-              </select>
-            </label>
-
-            <label className="block">
-              <span className="text-sm font-semibold">Cover image</span>
-
-              <input
-                type="file"
-                name="image"
-                onChange={handleImageChange}
-                accept="image/*"
-                className="mt-2 block w-full text-sm text-muted"
+                rows="3"
+                className="mt-2 w-full resize-none rounded-sm border border-stone bg-ivory px-3 py-3 text-sm outline-none transition-colors focus:border-burgundy"
+                placeholder="Private notes about this element..."
               />
             </label>
 
@@ -165,7 +168,9 @@ function StoryModal({ onClose, onStoryCreated }) {
                 disabled={isSubmitting}
                 className="rounded-md bg-burgundy px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-burgundy-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSubmitting ? "Creating story..." : "Create story"}
+                {isSubmitting
+                  ? `Creating ${label.toLowerCase()}...`
+                  : `Create ${label.toLowerCase()}`}
               </button>
             </div>
           </form>
@@ -175,4 +180,4 @@ function StoryModal({ onClose, onStoryCreated }) {
   );
 }
 
-export default StoryModal;
+export default StoryElementModal;
