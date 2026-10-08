@@ -1,4 +1,6 @@
 const Story = require("../models/Story");
+const StoryElement = require("../models/StoryElement");
+
 const {
   uploadToCloudinary,
   deleteFromCloudinary,
@@ -48,7 +50,52 @@ const getStories = async (req, res) => {
       createdAt: -1,
     });
 
-    return res.status(200).json(stories);
+    const storyIds = stories.map((story) => story._id);
+
+    const elementCounts = await StoryElement.aggregate([
+      {
+        $match: {
+          story: { $in: storyIds },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            story: "$story",
+            type: "$type",
+          },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const countsByStory = {};
+
+    elementCounts.forEach(({ _id, count }) => {
+      const storyId = _id.story.toString();
+
+      if (!countsByStory[storyId]) {
+        countsByStory[storyId] = {};
+      }
+
+      countsByStory[storyId][_id.type] = count;
+    });
+
+    const storiesWithCounts = stories.map((story) => {
+      const storyData = story.toObject();
+      const counts = countsByStory[story._id.toString()] || {};
+
+      return {
+        ...storyData,
+        elementCounts: {
+          CHARACTER: counts.CHARACTER || 0,
+          LOCATION: counts.LOCATION || 0,
+          EVENT: counts.EVENT || 0,
+        },
+      };
+    });
+
+    return res.status(200).json(storiesWithCounts);
   } catch (error) {
     return res.status(500).json({
       message: "Unable to fetch stories",

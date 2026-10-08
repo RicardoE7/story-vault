@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getStories } from "../api/stories";
 import StoryCard from "../components/StoryCard";
 import StoryModal from "../components/StoryModal";
@@ -30,36 +31,56 @@ function StoryLibrary() {
 
   return (
     <main className="min-h-screen bg-ivory text-ink">
-      <header className="border-b border-stone">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+      <header className="border-b border-stone bg-ink text-cream">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <Link
+            to="/stories"
+            className="font-display text-2xl font-semibold tracking-tight"
+          >
+            Story Vault
+          </Link>
+
+          <div className="flex items-center gap-5">
+            <button
+              type="button"
+              className="text-sm font-medium text-cream/80 transition-colors hover:text-cream"
+            >
+              User ▾
+            </button>
+
+            <button
+              type="button"
+              className="text-sm font-semibold text-cream/80 transition-colors hover:text-cream"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section className="mx-auto max-w-6xl px-6 py-12">
+        <div className="flex flex-col gap-6 border-b border-stone pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.04em] text-muted">
-              Story Vault
+              Story Library
             </p>
 
-            <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight">
+            <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight">
               Your Stories
             </h1>
+
+            <p className="mt-3 max-w-xl text-sm leading-6 text-muted">
+              Your private collection of fictional worlds.
+            </p>
           </div>
 
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="rounded-md bg-burgundy px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-burgundy-dark"
+            className="self-start rounded-md bg-burgundy px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-burgundy-dark sm:self-auto"
           >
-            New story
+            New Story
           </button>
-        </div>
-      </header>
-
-      <section className="mx-auto max-w-6xl px-6 py-12">
-        <div className="border-b border-stone pb-4">
-          <h2 className="font-display text-2xl font-semibold">Story library</h2>
-
-          <p className="mt-1 text-sm text-muted">
-            Your worlds, characters, places, and stories in one private
-            workspace.
-          </p>
         </div>
 
         <div className="mt-8">
@@ -84,10 +105,29 @@ function StoryLibrary() {
               {stories.map((story) => (
                 <StoryCard key={story._id} story={story} />
               ))}
+
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="flex min-h-[280px] flex-col items-center justify-center border border-dashed border-stone bg-transparent px-6 py-10 text-center transition-colors hover:border-burgundy hover:bg-cream"
+              >
+                <span className="font-display text-2xl font-semibold tracking-tight">
+                  Create a New Story
+                </span>
+
+                <span className="mt-2 text-sm text-muted">
+                  Start a new world.
+                </span>
+
+                <span className="mt-6 text-2xl font-light text-burgundy">
+                  +
+                </span>
+              </button>
             </div>
           )}
         </div>
       </section>
+
       {isModalOpen && (
         <StoryModal
           onClose={() => setIsModalOpen(false)}
