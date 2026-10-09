@@ -16,17 +16,17 @@ const getStoryElement = (storyId, elementId) => {
   return request(`/api/stories/${storyId}/elements/${elementId}`);
 };
 
-const createStoryElement = (storyId, data) => {
+const createStoryElement = (storyId, formData) => {
   return request(`/api/stories/${storyId}/elements`, {
     method: "POST",
-    body: JSON.stringify(data),
+    body: formData,
   });
 };
 
-const updateStoryElement = (storyId, elementId, data) => {
+const updateStoryElement = (storyId, elementId, formData) => {
   return request(`/api/stories/${storyId}/elements/${elementId}`, {
     method: "PUT",
-    body: JSON.stringify(data),
+    body: formData,
   });
 };
 

@@ -1,17 +1,30 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { getStory, getStoryElements } from "../api/stories";
 import StoryElementCard from "../components/StoryElementCard";
 import StoryElementModal from "../components/StoryElementModal";
 
 function StoryWorkspace() {
   const { storyId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const sectionFromUrl = searchParams.get("section");
+
+  const sectionLabels = {
+    CHARACTER: "Characters",
+    LOCATION: "Locations",
+    EVENT: "Events",
+    FACTION: "Factions",
+    ITEM: "Items",
+  };
+
+  const initialSection = sectionLabels[sectionFromUrl] || "Overview";
 
   const [story, setStory] = useState(null);
   const [elements, setElements] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeSection, setActiveSection] = useState("Overview");
+  const [activeSection, setActiveSection] = useState(initialSection);
   const [isElementModalOpen, setIsElementModalOpen] = useState(false);
 
   const elementTypeMap = {
@@ -166,7 +179,19 @@ function StoryWorkspace() {
               <button
                 key={section}
                 type="button"
-                onClick={() => setActiveSection(section)}
+                onClick={() => {
+                  setActiveSection(section);
+
+                  if (section === "Overview") {
+                    setSearchParams({});
+                  } else {
+                    const sectionType = Object.entries(sectionLabels).find(
+                      ([, label]) => label === section,
+                    )?.[0];
+
+                    setSearchParams({ section: sectionType });
+                  }
+                }}
                 className={`shrink-0 border-b-2 pb-3 text-sm font-semibold transition-colors ${
                   activeSection === section
                     ? "border-burgundy text-burgundy"
@@ -265,7 +290,11 @@ function StoryWorkspace() {
                   (element) => element.type === elementTypeMap[activeSection],
                 )
                 .map((element) => (
-                  <StoryElementCard key={element._id} element={element} />
+                  <StoryElementCard
+                    key={element._id}
+                    element={element}
+                    storyId={storyId}
+                  />
                 ))}
             </div>
           )}

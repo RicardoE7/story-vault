@@ -1,9 +1,13 @@
 const Story = require("../models/Story");
 const StoryElement = require("../models/StoryElement");
+const {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} = require("../utils/uploadToCloudinary");
 
 const createStoryElement = async (req, res) => {
   try {
-    const { name, type, role, status, description, notes, image } = req.body;
+    const { name, type, role, status, description, notes } = req.body;
     const { storyId } = req.params;
 
     if (!name || !type) {
@@ -21,6 +25,17 @@ const createStoryElement = async (req, res) => {
       return res.status(404).json({
         message: "Story not found",
       });
+    }
+
+    let image;
+
+    if (req.file) {
+      const result = await uploadToCloudinary(req.file.buffer);
+
+      image = {
+        url: result.secure_url,
+        publicId: result.public_id,
+      };
     }
 
     const storyElement = await StoryElement.create({
@@ -122,7 +137,7 @@ const getStoryElement = async (req, res) => {
 const updateStoryElement = async (req, res) => {
   try {
     const { storyId, elementId } = req.params;
-    const { name, type, role, status, description, notes, image } = req.body;
+    const { name, type, role, status, description, notes } = req.body;
 
     const parentStory = await Story.findOne({
       _id: storyId,
@@ -152,7 +167,21 @@ const updateStoryElement = async (req, res) => {
     storyElement.status = status ?? storyElement.status;
     storyElement.description = description ?? storyElement.description;
     storyElement.notes = notes ?? storyElement.notes;
-    storyElement.image = image ?? storyElement.image;
+
+    if (req.file) {
+      const oldPublicId = storyElement.image?.publicId;
+
+      const result = await uploadToCloudinary(req.file.buffer);
+
+      storyElement.image = {
+        url: result.secure_url,
+        publicId: result.public_id,
+      };
+
+      if (oldPublicId) {
+        await deleteFromCloudinary(oldPublicId);
+      }
+    }
 
     await storyElement.save();
 
@@ -188,6 +217,12 @@ const deleteStoryElement = async (req, res) => {
       return res.status(404).json({
         message: "Story element not found",
       });
+    }
+
+    const publicId = storyElement.image?.publicId;
+
+    if (publicId) {
+      await deleteFromCloudinary(publicId);
     }
 
     await storyElement.deleteOne();

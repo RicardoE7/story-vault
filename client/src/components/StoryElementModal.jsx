@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { createStoryElement } from "../api/stories";
+import { useEffect, useState } from "react";
+import { createStoryElement, updateStoryElement } from "../api/stories";
 
 const typeLabels = {
   CHARACTER: "Character",
@@ -12,25 +12,51 @@ const typeLabels = {
 function StoryElementModal({
   storyId,
   elementType,
+  element,
   onClose,
   onElementCreated,
+  onElementUpdated,
 }) {
+  const isEditMode = Boolean(element);
+  const label = typeLabels[elementType];
+
   const [form, setForm] = useState({
-    name: "",
-    role: "",
-    status: "",
-    description: "",
-    notes: "",
+    name: element?.name || "",
+    role: element?.role || "",
+    status: element?.status || "",
+    description: element?.description || "",
+    notes: element?.notes || "",
   });
 
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(element?.image?.url || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!imageFile) {
+      setImagePreview(element?.image?.url || "");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(imageFile);
+    setImagePreview(previewUrl);
+
+    return () => {
+      URL.revokeObjectURL(previewUrl);
+    };
+  }, [imageFile, element]);
 
   const handleChange = (event) => {
     setForm((currentForm) => ({
       ...currentForm,
       [event.target.name]: event.target.value,
     }));
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0] || null;
+    setImageFile(file);
   };
 
   const handleSubmit = async (event) => {
@@ -40,21 +66,42 @@ function StoryElementModal({
       setIsSubmitting(true);
       setError("");
 
-      const createdElement = await createStoryElement(storyId, {
-        ...form,
-        type: elementType,
+      const formData = new FormData();
+
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value);
       });
 
-      onElementCreated(createdElement);
+      formData.append("type", elementType);
+
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      if (isEditMode) {
+        const updatedElement = await updateStoryElement(
+          storyId,
+          element._id,
+          formData,
+        );
+
+        onElementUpdated?.(updatedElement);
+      } else {
+        const createdElement = await createStoryElement(storyId, formData);
+
+        onElementCreated?.(createdElement);
+      }
+
       onClose();
     } catch (err) {
-      setError(err.message || "Unable to create story element.");
+      setError(
+        err.message ||
+          `Unable to ${isEditMode ? "update" : "create"} story element.`,
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  const label = typeLabels[elementType];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-ink/40 px-6 py-8">
@@ -66,7 +113,7 @@ function StoryElementModal({
             </p>
 
             <h2 className="mt-1 font-display text-3xl font-semibold tracking-tight">
-              Add {label}
+              {isEditMode ? `Edit ${label}` : `Add ${label}`}
             </h2>
           </div>
 
@@ -82,6 +129,38 @@ function StoryElementModal({
 
         <div className="overflow-y-auto px-6 py-5">
           <form onSubmit={handleSubmit} className="space-y-5">
+            {imagePreview && (
+              <div>
+                <span className="text-sm font-semibold">Image</span>
+
+                <div className="mt-2 overflow-hidden border border-stone bg-ivory">
+                  <img
+                    src={imagePreview}
+                    alt={`${form.name || label} preview`}
+                    className="aspect-[16/7] w-full object-cover"
+                  />
+                </div>
+              </div>
+            )}
+
+            <label className="block">
+              <span className="text-sm font-semibold">
+                {imagePreview ? "Replace image" : "Image"}
+              </span>
+
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="mt-2 block w-full text-sm text-muted file:mr-4 file:border-0 file:bg-ivory file:px-4 file:py-2 file:text-sm file:font-semibold file:text-ink"
+              />
+
+              <p className="mt-2 text-xs leading-5 text-muted">
+                Optional. Images must be 5 MB or smaller.
+              </p>
+            </label>
+
             <label className="block">
               <span className="text-sm font-semibold">Name</span>
 
@@ -169,8 +248,12 @@ function StoryElementModal({
                 className="rounded-md bg-burgundy px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-burgundy-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting
-                  ? `Creating ${label.toLowerCase()}...`
-                  : `Create ${label.toLowerCase()}`}
+                  ? isEditMode
+                    ? `Saving ${label.toLowerCase()}...`
+                    : `Creating ${label.toLowerCase()}...`
+                  : isEditMode
+                    ? "Save changes"
+                    : `Create ${label.toLowerCase()}`}
               </button>
             </div>
           </form>

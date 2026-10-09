@@ -1,4 +1,6 @@
-function StoryElementCard({ element }) {
+import { Link } from "react-router-dom";
+
+function StoryElementCard({ element, storyId }) {
   const typeLabels = {
     CHARACTER: "Character",
     LOCATION: "Location",
@@ -8,7 +10,10 @@ function StoryElementCard({ element }) {
   };
 
   return (
-    <article className="border border-stone bg-cream transition-colors hover:border-muted">
+    <Link
+      to={`/stories/${storyId}/elements/${element._id}?section=${element.type}`}
+      className="block border border-stone bg-cream transition-colors hover:border-muted"
+    >
       {element.image?.url ? (
         <div className="aspect-[4/3] overflow-hidden border-b border-stone bg-ivory">
           <img
@@ -50,7 +55,7 @@ function StoryElementCard({ element }) {
           <p className="mt-3 text-sm text-muted">{element.status}</p>
         )}
       </div>
-    </article>
+    </Link>
   );
 }
 
