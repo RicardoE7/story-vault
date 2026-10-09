@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { createStory } from "../api/stories";
+import { createStory, updateStory } from "../api/stories";
 
-function StoryModal({ onClose, onStoryCreated }) {
+function StoryModal({ story = null, onClose, onStoryCreated, onStoryUpdated }) {
+  const isEditMode = Boolean(story);
+
   const [form, setForm] = useState({
-    title: "",
-    description: "",
-    genre: "",
-    status: "PLANNING",
+    title: story?.title || "",
+    description: story?.description || "",
+    genre: story?.genre || "",
+    status: story?.status || "PLANNING",
   });
 
   const [image, setImage] = useState(null);
@@ -42,12 +44,19 @@ function StoryModal({ onClose, onStoryCreated }) {
         formData.append("image", image);
       }
 
-      const createdStory = await createStory(formData);
+      if (isEditMode) {
+        const updatedStory = await updateStory(story._id, formData);
+        onStoryUpdated(updatedStory);
+      } else {
+        const createdStory = await createStory(formData);
+        onStoryCreated(createdStory);
+      }
 
-      onStoryCreated(createdStory);
       onClose();
     } catch (err) {
-      setError(err.message || "Unable to create story.");
+      setError(
+        err.message || `Unable to ${isEditMode ? "update" : "create"} story.`,
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -63,7 +72,7 @@ function StoryModal({ onClose, onStoryCreated }) {
             </p>
 
             <h2 className="mt-1 font-display text-3xl font-semibold tracking-tight">
-              New Story
+              {isEditMode ? "Edit Story" : "New Story"}
             </h2>
           </div>
 
@@ -87,6 +96,7 @@ function StoryModal({ onClose, onStoryCreated }) {
                 name="title"
                 value={form.title}
                 onChange={handleChange}
+                required
                 className="mt-2 w-full rounded-sm border border-stone bg-ivory px-3 py-3 text-sm outline-none transition-colors focus:border-burgundy"
                 placeholder="Enter your story title"
               />
@@ -133,8 +143,22 @@ function StoryModal({ onClose, onStoryCreated }) {
               </select>
             </label>
 
+            {isEditMode && story.image?.url && (
+              <div>
+                <span className="text-sm font-semibold">Current cover</span>
+
+                <img
+                  src={story.image.url}
+                  alt={`${story.title} cover`}
+                  className="mt-2 h-32 w-48 border border-stone object-cover"
+                />
+              </div>
+            )}
+
             <label className="block">
-              <span className="text-sm font-semibold">Cover image</span>
+              <span className="text-sm font-semibold">
+                {isEditMode ? "Replace cover image (optional)" : "Cover image"}
+              </span>
 
               <input
                 type="file"
@@ -143,6 +167,18 @@ function StoryModal({ onClose, onStoryCreated }) {
                 accept="image/*"
                 className="mt-2 block w-full text-sm text-muted"
               />
+
+              {image && (
+                <p className="mt-2 text-sm text-muted">
+                  Selected: {image.name}
+                </p>
+              )}
+
+              {isEditMode && (
+                <p className="mt-1 text-xs leading-5 text-muted">
+                  Leave this empty to keep the current cover.
+                </p>
+              )}
             </label>
 
             {error && (
@@ -165,7 +201,13 @@ function StoryModal({ onClose, onStoryCreated }) {
                 disabled={isSubmitting}
                 className="rounded-md bg-burgundy px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-burgundy-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSubmitting ? "Creating story..." : "Create story"}
+                {isSubmitting
+                  ? isEditMode
+                    ? "Saving changes..."
+                    : "Creating story..."
+                  : isEditMode
+                    ? "Save changes"
+                    : "Create story"}
               </button>
             </div>
           </form>

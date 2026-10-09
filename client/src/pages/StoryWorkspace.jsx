@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { getStory, getStoryElements } from "../api/stories";
 import StoryElementCard from "../components/StoryElementCard";
 import StoryElementModal from "../components/StoryElementModal";
+import StoryModal from "../components/StoryModal";
 
 function StoryWorkspace() {
   const { storyId } = useParams();
@@ -26,6 +27,7 @@ function StoryWorkspace() {
   const [error, setError] = useState("");
   const [activeSection, setActiveSection] = useState(initialSection);
   const [isElementModalOpen, setIsElementModalOpen] = useState(false);
+  const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
 
   const elementTypeMap = {
     Characters: "CHARACTER",
@@ -160,6 +162,7 @@ function StoryWorkspace() {
 
           <button
             type="button"
+            onClick={() => setIsStoryModalOpen(true)}
             className="self-start rounded-md border border-stone px-5 py-3 text-sm font-semibold text-ink transition-colors hover:border-ink"
           >
             Edit Story
@@ -300,6 +303,15 @@ function StoryWorkspace() {
           )}
         </div>
       </section>
+      {isStoryModalOpen && story && (
+        <StoryModal
+          story={story}
+          onClose={() => setIsStoryModalOpen(false)}
+          onStoryUpdated={(updatedStory) => {
+            setStory(updatedStory);
+          }}
+        />
+      )}
       {isElementModalOpen && activeSection !== "Overview" && (
         <StoryElementModal
           storyId={storyId}
