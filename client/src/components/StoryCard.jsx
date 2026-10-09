@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import storyPlaceholder from "../assets/story-placeholder.jpg";
 
 const statusLabels = {
   PLANNING: "Planning",
@@ -32,10 +33,16 @@ function StoryCard({ story }) {
           />
         </div>
       ) : (
-        <div className="flex aspect-[16/9] items-end border-b border-stone bg-ivory p-5">
-          <span className="text-xs font-semibold uppercase tracking-[0.04em] text-muted">
-            Story Vault
-          </span>
+        <div className="aspect-[16/9] overflow-hidden border-b border-stone bg-ivory">
+          <img
+            src={story.image?.url || storyPlaceholder}
+            alt={
+              story.image?.url
+                ? story.title
+                : `${story.title} placeholder cover`
+            }
+            className="h-full w-full object-cover"
+          />
         </div>
       )}
 

@@ -15,11 +15,16 @@ function AppHeader({ user }) {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link
           to="/stories"
-          className="font-display text-2xl font-semibold tracking-tight"
+          className="flex items-center gap-2 font-display text-2xl font-semibold tracking-tight"
         >
-          Story Vault
+          <img
+            src="/favicon.svg"
+            alt=""
+            aria-hidden="true"
+            className="h-10 w-10 shrink-0 object-contain"
+          />
+          <span>Story Vault</span>
         </Link>
-
         <div className="flex items-center gap-5">
           <div className="relative">
             <button

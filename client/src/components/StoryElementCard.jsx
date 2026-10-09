@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import storyPlaceholder from "../assets/story-placeholder.jpg";
 
 function StoryElementCard({ element, storyId }) {
   const typeLabels = {
@@ -23,10 +24,16 @@ function StoryElementCard({ element, storyId }) {
           />
         </div>
       ) : (
-        <div className="flex aspect-[4/3] items-end border-b border-stone bg-ivory p-5">
-          <span className="text-xs font-semibold uppercase tracking-[0.04em] text-muted">
-            {typeLabels[element.type]}
-          </span>
+        <div className="aspect-[4/3] overflow-hidden border-b border-stone bg-ivory">
+          <img
+            src={element.image?.url || storyPlaceholder}
+            alt={
+              element.image?.url
+                ? element.name
+                : `${typeLabels[element.type]} placeholder`
+            }
+            className="h-full w-full object-cover"
+          />
         </div>
       )}
 
