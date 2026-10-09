@@ -15,27 +15,17 @@ function StoryElementCard({ element, storyId }) {
       to={`/stories/${storyId}/elements/${element._id}?section=${element.type}`}
       className="block border border-stone bg-cream transition-colors hover:border-muted"
     >
-      {element.image?.url ? (
-        <div className="aspect-[4/3] overflow-hidden border-b border-stone bg-ivory">
-          <img
-            src={element.image.url}
-            alt={element.name}
-            className="h-full w-full object-cover"
-          />
-        </div>
-      ) : (
-        <div className="aspect-[4/3] overflow-hidden border-b border-stone bg-ivory">
-          <img
-            src={element.image?.url || storyPlaceholder}
-            alt={
-              element.image?.url
-                ? element.name
-                : `${typeLabels[element.type]} placeholder`
-            }
-            className="h-full w-full object-cover"
-          />
-        </div>
-      )}
+      <div className="aspect-[4/3] overflow-hidden border-b border-stone bg-ivory">
+        <img
+          src={element.image?.url || storyPlaceholder}
+          alt={
+            element.image?.url
+              ? element.name
+              : `${typeLabels[element.type]} placeholder`
+          }
+          className="h-full w-full object-cover"
+        />
+      </div>
 
       <div className="p-5">
         <div className="flex items-start justify-between gap-4">
@@ -44,18 +34,10 @@ function StoryElementCard({ element, storyId }) {
               {element.role || typeLabels[element.type]}
             </p>
 
-            <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight">
+            <h3 className="mt-2 break-words font-display text-2xl font-semibold tracking-tight">
               {element.name}
             </h3>
           </div>
-
-          <button
-            type="button"
-            className="text-lg leading-none text-muted transition-colors hover:text-ink"
-            aria-label={`More actions for ${element.name}`}
-          >
-            ...
-          </button>
         </div>
 
         {element.status && (

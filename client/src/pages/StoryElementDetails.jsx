@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { deleteStoryElement, getStoryElement } from "../api/stories";
 import StoryElementModal from "../components/StoryElementModal";
+import storyPlaceholder from "../assets/story-placeholder.jpg";
 
 const typeLabels = {
   CHARACTER: "Character",
@@ -98,21 +99,15 @@ function StoryElementDetails() {
         <div className="mt-8 flex flex-col gap-8 border-b border-stone pb-8 md:flex-row md:items-start md:justify-between">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
             <div className="w-full shrink-0 sm:w-64">
-              {element.image?.url ? (
-                <div className="aspect-[4/3] overflow-hidden border border-stone bg-cream">
-                  <img
-                    src={element.image.url}
-                    alt={element.name}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="flex aspect-[4/3] items-end border border-stone bg-cream p-5">
-                  <span className="text-xs font-semibold uppercase tracking-[0.04em] text-muted">
-                    {label}
-                  </span>
-                </div>
-              )}
+              <div className="aspect-[4/3] overflow-hidden border border-stone bg-cream">
+                <img
+                  src={element.image?.url || storyPlaceholder}
+                  alt={
+                    element.image?.url ? element.name : `${label} placeholder`
+                  }
+                  className="h-full w-full object-cover"
+                />
+              </div>
             </div>
 
             <div>

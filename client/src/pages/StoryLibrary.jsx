@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getStories } from "../api/stories";
+import { deleteStory, getStories } from "../api/stories";
 import StoryCard from "../components/StoryCard";
 import StoryModal from "../components/StoryModal";
 
@@ -9,6 +9,7 @@ function StoryLibrary() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingStory, setEditingStory] = useState(null);
 
   useEffect(() => {
     const loadStories = async () => {
@@ -28,6 +29,21 @@ function StoryLibrary() {
 
     loadStories();
   }, []);
+
+  const handleDeleteStory = async (story) => {
+    const confirmed = window.confirm(
+      `Delete "${story.title}"? This action cannot be undone.`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteStory(story._id);
+      setStories((current) => current.filter((item) => item._id !== story._id));
+    } catch (err) {
+      setError(err.message || "Unable to delete this story.");
+    }
+  };
 
   return (
     <main className="min-h-screen bg-ivory text-ink">
@@ -68,15 +84,39 @@ function StoryLibrary() {
           )}
 
           {!isLoading && !error && stories.length === 0 && (
-            <p className="text-sm text-muted">
-              You haven't created a story yet.
-            </p>
+            <div className="flex min-h-64 flex-col items-center justify-center border-y border-stone px-6 py-12 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.04em] text-muted">
+                A place for what comes next
+              </p>
+
+              <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight">
+                Every world begins somewhere.
+              </h2>
+
+              <p className="mt-3 max-w-md text-sm leading-6 text-muted">
+                Create your first story to start collecting its characters,
+                places, events, and ideas.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="mt-6 border border-burgundy px-5 py-3 text-sm font-semibold text-burgundy transition-colors hover:bg-burgundy hover:text-white"
+              >
+                Create your first story
+              </button>
+            </div>
           )}
 
           {!isLoading && !error && stories.length > 0 && (
             <div className="grid gap-6 md:grid-cols-2">
               {stories.map((story) => (
-                <StoryCard key={story._id} story={story} />
+                <StoryCard
+                  key={story._id}
+                  story={story}
+                  onEdit={setEditingStory}
+                  onDelete={handleDeleteStory}
+                />
               ))}
 
               <button
@@ -106,6 +146,21 @@ function StoryLibrary() {
           onClose={() => setIsModalOpen(false)}
           onStoryCreated={(story) => {
             setStories((currentStories) => [story, ...currentStories]);
+          }}
+        />
+      )}
+
+      {editingStory && (
+        <StoryModal
+          story={editingStory}
+          onClose={() => setEditingStory(null)}
+          onStoryUpdated={(updatedStory) => {
+            setStories((current) =>
+              current.map((story) =>
+                story._id === updatedStory._id ? updatedStory : story,
+              ),
+            );
+            setEditingStory(null);
           }}
         />
       )}

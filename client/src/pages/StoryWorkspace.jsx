@@ -4,6 +4,7 @@ import { getStory, getStoryElements } from "../api/stories";
 import StoryElementCard from "../components/StoryElementCard";
 import StoryElementModal from "../components/StoryElementModal";
 import StoryModal from "../components/StoryModal";
+import storyPlaceholder from "../assets/story-placeholder.jpg";
 
 function StoryWorkspace() {
   const { storyId } = useParams();
@@ -58,6 +59,10 @@ function StoryWorkspace() {
     loadStory();
   }, [storyId]);
 
+  useEffect(() => {
+    setActiveSection(sectionLabels[sectionFromUrl] || "Overview");
+  }, [sectionFromUrl]);
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-ivory px-6 py-12 text-ink">
@@ -99,21 +104,17 @@ function StoryWorkspace() {
         <div className="flex flex-col gap-8 border-b border-stone pb-8 md:flex-row md:items-start md:justify-between">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
             <div className="w-full shrink-0 sm:w-56">
-              {story.image?.url ? (
-                <div className="aspect-[4/3] overflow-hidden border border-stone bg-cream">
-                  <img
-                    src={story.image.url}
-                    alt={story.title}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="flex aspect-[4/3] items-end border border-stone bg-cream p-5">
-                  <span className="text-xs font-semibold uppercase tracking-[0.04em] text-muted">
-                    Story Vault
-                  </span>
-                </div>
-              )}
+              <div className="aspect-[4/3] overflow-hidden border border-stone bg-cream">
+                <img
+                  src={story.image?.url || storyPlaceholder}
+                  alt={
+                    story.image?.url
+                      ? story.title
+                      : `${story.title} placeholder cover`
+                  }
+                  className="h-full w-full object-cover"
+                />
+              </div>
             </div>
 
             <div className="max-w-2xl">
@@ -243,8 +244,14 @@ function StoryWorkspace() {
                   return (
                     <div
                       key={type}
-                      className={`px-5 py-6 ${
-                        index > 0 ? "border-l border-stone" : ""
+                      className={`px-4 py-5 sm:px-5 md:py-6 ${
+                        index % 2 === 1 ? "border-l border-stone" : ""
+                      } ${
+                        index >= 2 ? "border-t border-stone md:border-t-0" : ""
+                      } ${
+                        index >= 1
+                          ? "md:border-l md:border-stone"
+                          : "md:border-l-0"
                       }`}
                     >
                       <p className="font-display text-3xl font-semibold">

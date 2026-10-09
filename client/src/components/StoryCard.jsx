@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import storyPlaceholder from "../assets/story-placeholder.jpg";
 
@@ -19,52 +20,79 @@ const formatLastEdited = (date) => {
   })}`;
 };
 
-function StoryCard({ story }) {
+function StoryCard({ story, onEdit, onDelete }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const counts = story.elementCounts || {};
+
+  const handleDelete = () => {
+    setIsMenuOpen(false);
+    onDelete(story);
+  };
 
   return (
     <article className="overflow-hidden border border-stone bg-cream">
-      {story.image?.url ? (
-        <div className="aspect-[16/9] overflow-hidden border-b border-stone bg-ivory">
-          <img
-            src={story.image.url}
-            alt={story.title}
-            className="h-full w-full object-cover"
-          />
-        </div>
-      ) : (
-        <div className="aspect-[16/9] overflow-hidden border-b border-stone bg-ivory">
-          <img
-            src={story.image?.url || storyPlaceholder}
-            alt={
-              story.image?.url
-                ? story.title
-                : `${story.title} placeholder cover`
-            }
-            className="h-full w-full object-cover"
-          />
-        </div>
-      )}
+      <div className="aspect-[16/9] overflow-hidden border-b border-stone bg-ivory">
+        <img
+          src={story.image?.url || storyPlaceholder}
+          alt={
+            story.image?.url ? story.title : `${story.title} placeholder cover`
+          }
+          className="h-full w-full object-cover"
+        />
+      </div>
 
       <div className="p-6">
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.04em] text-muted">
               {story.genre || "Uncategorized"}
             </p>
 
-            <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight">
+            <h3 className="mt-2 break-words font-display text-2xl font-semibold tracking-tight">
               {story.title}
             </h3>
           </div>
 
-          <button
-            type="button"
-            className="text-lg leading-none text-muted transition-colors hover:text-ink"
-            aria-label={`More actions for ${story.title}`}
-          >
-            ...
-          </button>
+          <div className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen((open) => !open)}
+              aria-label={`More actions for ${story.title}`}
+              aria-expanded={isMenuOpen}
+              aria-haspopup="menu"
+              className="px-2 py-1 text-lg leading-none text-muted transition-colors hover:text-ink"
+            >
+              ...
+            </button>
+
+            {isMenuOpen && (
+              <div
+                role="menu"
+                className="absolute right-0 top-full z-20 mt-2 w-40 border border-stone bg-cream py-1 shadow-md"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    onEdit(story);
+                  }}
+                  className="block w-full px-4 py-2 text-left text-sm text-ink hover:bg-ivory"
+                >
+                  Edit story
+                </button>
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={handleDelete}
+                  className="block w-full px-4 py-2 text-left text-sm text-burgundy hover:bg-ivory"
+                >
+                  Delete story
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {story.description && (
