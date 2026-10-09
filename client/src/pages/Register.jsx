@@ -3,6 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { register } from "../api/auth";
 import AuthLayout from "../components/AuthLayout";
 
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s])(?=.*\S).{8,}$/;
+
 function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -24,6 +27,13 @@ function Register() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+
+    if (!PASSWORD_REGEX.test(form.password)) {
+      setError(
+        "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a special character.",
+      );
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
@@ -88,8 +98,15 @@ function Register() {
             value={form.password}
             onChange={handleChange}
             required
+            minLength={8}
+            pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s])(?=.*\S).{8,}"
+            title="Use at least 8 characters, including uppercase and lowercase letters, a number, and a special character."
             className="mt-2 w-full rounded-sm border border-stone bg-ivory px-3 py-3 text-sm outline-none transition-colors focus:border-burgundy"
           />
+          <p className="mt-2 text-xs leading-5 text-muted">
+            At least 8 characters, with uppercase and lowercase letters, a
+            number, and a special character.
+          </p>
         </label>
 
         <label className="block">
