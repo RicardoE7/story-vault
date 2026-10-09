@@ -10,6 +10,9 @@ function StoryLibrary() {
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStory, setEditingStory] = useState(null);
+  const [storyToDelete, setStoryToDelete] = useState(null);
+  const [isDeletingStory, setIsDeletingStory] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     const loadStories = async () => {
@@ -30,18 +33,29 @@ function StoryLibrary() {
     loadStories();
   }, []);
 
-  const handleDeleteStory = async (story) => {
-    const confirmed = window.confirm(
-      `Delete "${story.title}"? This action cannot be undone.`,
-    );
+  const handleDeleteStory = (story) => {
+    setDeleteError("");
+    setStoryToDelete(story);
+  };
 
-    if (!confirmed) return;
+  const confirmDeleteStory = async () => {
+    if (!storyToDelete || isDeletingStory) return;
+
+    setIsDeletingStory(true);
+    setDeleteError("");
 
     try {
-      await deleteStory(story._id);
-      setStories((current) => current.filter((item) => item._id !== story._id));
+      await deleteStory(storyToDelete._id);
+
+      setStories((current) =>
+        current.filter((story) => story._id !== storyToDelete._id),
+      );
+
+      setStoryToDelete(null);
     } catch (err) {
-      setError(err.message || "Unable to delete this story.");
+      setDeleteError(err.message || "Unable to delete this story.");
+    } finally {
+      setIsDeletingStory(false);
     }
   };
 
@@ -163,6 +177,100 @@ function StoryLibrary() {
             setEditingStory(null);
           }}
         />
+      )}
+
+      {storyToDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 px-6 py-8"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !isDeletingStory) {
+              setStoryToDelete(null);
+              setDeleteError("");
+            }
+          }}
+        >
+          <section
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+            aria-describedby="delete-dialog-description"
+            className="w-full max-w-lg border border-stone bg-cream p-6 shadow-xl sm:p-8"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-burgundy">
+                Confirm deletion
+              </p>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (!isDeletingStory) {
+                    setStoryToDelete(null);
+                    setDeleteError("");
+                  }
+                }}
+                disabled={isDeletingStory}
+                aria-label="Close confirmation"
+                className="text-sm text-muted transition-colors hover:text-ink disabled:opacity-50"
+              >
+                Close
+              </button>
+            </div>
+
+            <h2
+              id="delete-dialog-title"
+              className="mt-5 font-display text-3xl font-semibold tracking-tight"
+            >
+              Delete story?
+            </h2>
+
+            <p
+              id="delete-dialog-description"
+              className="mt-3 text-sm leading-7 text-muted"
+            >
+              You are about to permanently delete{" "}
+              <span className="font-semibold text-ink">
+                {storyToDelete.title}
+              </span>
+              . Its saved details and image will be removed. This action cannot
+              be undone.
+            </p>
+
+            {deleteError && (
+              <p
+                role="alert"
+                className="mt-4 border-l-2 border-burgundy pl-3 text-sm leading-6 text-burgundy"
+              >
+                {deleteError}
+              </p>
+            )}
+
+            <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!isDeletingStory) {
+                    setStoryToDelete(null);
+                    setDeleteError("");
+                  }
+                }}
+                disabled={isDeletingStory}
+                className="border border-stone px-5 py-3 text-sm font-semibold text-ink transition-colors hover:border-ink disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={isDeletingStory}
+                onClick={confirmDeleteStory}
+                className="border border-burgundy bg-burgundy px-5 py-3 text-sm font-semibold text-cream transition-colors hover:bg-burgundy-dark disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isDeletingStory ? "Deleting..." : "Delete story"}
+              </button>
+            </div>
+          </section>
+        </div>
       )}
     </main>
   );
