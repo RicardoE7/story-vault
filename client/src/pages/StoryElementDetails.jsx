@@ -50,7 +50,6 @@ function StoryElementDetails() {
   }, [storyId, elementId]);
 
   const label = element ? typeLabels[element.type] : "";
-
   const parentSection = element ? sectionByType[element.type] : null;
 
   const storyWorkspacePath = parentSection
@@ -60,17 +59,6 @@ function StoryElementDetails() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-ivory text-ink">
-        <header className="border-b border-stone bg-ink text-cream">
-          <div className="mx-auto max-w-6xl px-6 py-4">
-            <Link
-              to="/stories"
-              className="font-display text-2xl font-semibold tracking-tight"
-            >
-              Story Vault
-            </Link>
-          </div>
-        </header>
-
         <section className="mx-auto max-w-6xl px-6 py-12">
           <p className="text-sm text-muted">Loading element...</p>
         </section>
@@ -81,17 +69,6 @@ function StoryElementDetails() {
   if (error || !element) {
     return (
       <main className="min-h-screen bg-ivory text-ink">
-        <header className="border-b border-stone bg-ink text-cream">
-          <div className="mx-auto max-w-6xl px-6 py-4">
-            <Link
-              to="/stories"
-              className="font-display text-2xl font-semibold tracking-tight"
-            >
-              Story Vault
-            </Link>
-          </div>
-        </header>
-
         <section className="mx-auto max-w-6xl px-6 py-12">
           <p className="text-sm text-burgundy">
             {error || "Story element not found."}
@@ -110,33 +87,6 @@ function StoryElementDetails() {
 
   return (
     <main className="min-h-screen bg-ivory text-ink">
-      <header className="border-b border-stone bg-ink text-cream">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link
-            to="/stories"
-            className="font-display text-2xl font-semibold tracking-tight"
-          >
-            Story Vault
-          </Link>
-
-          <div className="flex items-center gap-5">
-            <button
-              type="button"
-              className="text-sm font-medium text-cream/80 transition-colors hover:text-cream"
-            >
-              User ▾
-            </button>
-
-            <button
-              type="button"
-              className="text-sm font-semibold text-cream/80 transition-colors hover:text-cream"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
-
       <section className="mx-auto max-w-6xl px-6 py-12">
         <Link
           to={storyWorkspacePath}

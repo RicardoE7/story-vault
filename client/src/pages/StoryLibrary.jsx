@@ -31,33 +31,6 @@ function StoryLibrary() {
 
   return (
     <main className="min-h-screen bg-ivory text-ink">
-      <header className="border-b border-stone bg-ink text-cream">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link
-            to="/stories"
-            className="font-display text-2xl font-semibold tracking-tight"
-          >
-            Story Vault
-          </Link>
-
-          <div className="flex items-center gap-5">
-            <button
-              type="button"
-              className="text-sm font-medium text-cream/80 transition-colors hover:text-cream"
-            >
-              User ▾
-            </button>
-
-            <button
-              type="button"
-              className="text-sm font-semibold text-cream/80 transition-colors hover:text-cream"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
-
       <section className="mx-auto max-w-6xl px-6 py-12">
         <div className="flex flex-col gap-6 border-b border-stone pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
